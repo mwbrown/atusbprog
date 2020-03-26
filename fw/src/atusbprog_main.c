@@ -32,14 +32,24 @@ void SiLabs_Startup(void) {
 	// [SiLabs Startup]$
 }
 
+static void write_char(uint8_t c) {
+	// assumes sfr page is set already
+	SBUF0 = c;
+	while (!SCON0_TI) {
+		NOP();
+	}
+
+	SCON0_TI = 0;
+}
+
 static void write_banner(void) {
-    unsigned char sfr_save = SFRPAGE;
-    SFRPAGE = 0x20;
-    SBUF1 = 'B';
-    SBUF1 = '\r';
-    SBUF1 = '\n';
-    SBUF1 = '0';
-    SFRPAGE = sfr_save;
+	unsigned char sfr_save = SFRPAGE;
+	SFRPAGE = 0x20;
+	write_char('B');
+	write_char('\r');
+	write_char('\n');
+	write_char('0');
+	SFRPAGE = sfr_save;
 }
 
 //-----------------------------------------------------------------------------

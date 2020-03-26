@@ -81,7 +81,11 @@ SI_SEGMENT_VARIABLE(usb_rx, usb_rx_t, SI_SEG_IDATA);
 static void writechar(uint8_t c) {
     unsigned char sfr_save = SFRPAGE;
     SFRPAGE = 0x20;
-    SBUF1 = c;
+    SBUF0 = c;
+    while(!SCON0_TI) {
+    	NOP();
+    }
+    SCON0_TI = 0;
     SFRPAGE = sfr_save;
 }
 
