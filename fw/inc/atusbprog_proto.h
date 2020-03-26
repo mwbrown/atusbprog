@@ -52,7 +52,7 @@ typedef struct aup_out_msg_led_req_s {
 typedef struct aup_out_msg_s {
     uint8_t msg_type;
     union {
-    	aup_out_msg_led_req_t led_req;
+        aup_out_msg_led_req_t led_req;
     } msg_data;
 } PACKED aup_out_msg_t;
 
