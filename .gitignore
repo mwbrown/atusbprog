@@ -1,3 +1,5 @@
 fw/Keil*
 
 *.sublime-*
+
+sw_host/linux/build
