@@ -23,10 +23,10 @@
     <property object="P2.0" propertyId="ports.settings.label" value="VCOM_ENA"/>
     <property object="PBCFG_0" propertyId="pbcfg.settings.enablecrossbar" value="Enabled"/>
     <property object="SPI_0" propertyId="ABPeripheral.included" value="true"/>
-    <property object="SPI_0" propertyId="spi.clockrate.spiclockfrequencyactual" value="80.858 kHz"/>
-    <property object="SPI_0" propertyId="spi.clockrate.spiclockfrequencytarget" value="80858"/>
+    <property object="SPI_0" propertyId="spi.clockrate.spiclockfrequencyactual" value="408.333 kHz"/>
+    <property object="SPI_0" propertyId="spi.clockrate.spiclockfrequencytarget" value="408333"/>
     <property object="SPI_0" propertyId="spi.clockrate.sysclk" value="16.333 MHz"/>
-    <property object="SPI_0" propertyId="spi.clockrate.sysclkdividercoefficientspi0ckr" value="100"/>
+    <property object="SPI_0" propertyId="spi.clockrate.sysclkdividercoefficientspi0ckr" value="19"/>
     <property object="SPI_0" propertyId="spi.configuration.enablemastermode" value="Enable"/>
     <property object="SPI_0" propertyId="spi.configuration.spimode" value="Master"/>
     <property object="SPI_0" propertyId="spi.control.slaveselectmode" value="Slave or master 3-wire mode"/>
