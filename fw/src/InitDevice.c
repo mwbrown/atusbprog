@@ -355,12 +355,24 @@ extern void UARTE_1_enter_DefaultMode_from_RESET(void) {
 
 extern void PORTS_1_enter_DefaultMode_from_RESET(void) {
 	// $[P1 - Port 1 Pin Latch]
+	/***********************************************************************
+	 - P1.0 is high. Set P1.0 to drive or float high
+	 - P1.1 is low. Set P1.1 to drive low
+	 - P1.2 is high. Set P1.2 to drive or float high
+	 - P1.3 is high. Set P1.3 to drive or float high
+	 - P1.4 is high. Set P1.4 to drive or float high
+	 - P1.5 is high. Set P1.5 to drive or float high
+	 - P1.6 is high. Set P1.6 to drive or float high
+	 - P1.7 is high. Set P1.7 to drive or float high
+	 ***********************************************************************/
+	P1 = P1_B0__HIGH | P1_B1__LOW | P1_B2__HIGH | P1_B3__HIGH | P1_B4__HIGH
+			| P1_B5__HIGH | P1_B6__HIGH | P1_B7__HIGH;
 	// [P1 - Port 1 Pin Latch]$
 
 	// $[P1MDOUT - Port 1 Output Mode]
 	/***********************************************************************
 	 - P1.0 output is push-pull
-	 - P1.1 output is open-drain
+	 - P1.1 output is push-pull
 	 - P1.2 output is open-drain
 	 - P1.3 output is open-drain
 	 - P1.4 output is open-drain
@@ -368,7 +380,7 @@ extern void PORTS_1_enter_DefaultMode_from_RESET(void) {
 	 - P1.6 output is open-drain
 	 - P1.7 output is open-drain
 	 ***********************************************************************/
-	P1MDOUT = P1MDOUT_B0__PUSH_PULL | P1MDOUT_B1__OPEN_DRAIN
+	P1MDOUT = P1MDOUT_B0__PUSH_PULL | P1MDOUT_B1__PUSH_PULL
 			| P1MDOUT_B2__OPEN_DRAIN | P1MDOUT_B3__OPEN_DRAIN
 			| P1MDOUT_B4__OPEN_DRAIN | P1MDOUT_B5__OPEN_DRAIN
 			| P1MDOUT_B6__OPEN_DRAIN | P1MDOUT_B7__OPEN_DRAIN;
@@ -378,6 +390,20 @@ extern void PORTS_1_enter_DefaultMode_from_RESET(void) {
 	// [P1MDIN - Port 1 Input Mode]$
 
 	// $[P1SKIP - Port 1 Skip]
+	/***********************************************************************
+	 - P1.0 pin is not skipped by the crossbar
+	 - P1.1 pin is skipped by the crossbar
+	 - P1.2 pin is not skipped by the crossbar
+	 - P1.3 pin is not skipped by the crossbar
+	 - P1.4 pin is not skipped by the crossbar
+	 - P1.5 pin is not skipped by the crossbar
+	 - P1.6 pin is not skipped by the crossbar
+	 - P1.7 pin is not skipped by the crossbar
+	 ***********************************************************************/
+	P1SKIP = P1SKIP_B0__NOT_SKIPPED | P1SKIP_B1__SKIPPED
+			| P1SKIP_B2__NOT_SKIPPED | P1SKIP_B3__NOT_SKIPPED
+			| P1SKIP_B4__NOT_SKIPPED | P1SKIP_B5__NOT_SKIPPED
+			| P1SKIP_B6__NOT_SKIPPED | P1SKIP_B7__NOT_SKIPPED;
 	// [P1SKIP - Port 1 Skip]$
 
 	// $[P1MASK - Port 1 Mask]
