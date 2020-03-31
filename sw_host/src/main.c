@@ -2,21 +2,33 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <libusb.h>
-#include <endian.h>
 #include <stdbool.h>
+
+// TODO clean up platform specific functions into port directory
+#ifndef _MSC_VER
+#include <endian.h>
 #include <unistd.h>
+#endif
 
 #include "atusbprog_proto.h"
-
 #include "device.h"
 
 /* Build with a warning as long as we are still using a reserved PID. */
 #if ATUSBPROG_USB_PID <= 0x0010
-#warning "atusbprog is being built with a TEST PID! This is for development use ONLY"
+#pragma message("atusbprog is being built with a TEST PID! This is for development use ONLY")
 #endif
 
 static libusb_device_handle *dev;
-static uint16_t last_sof_nr;
+
+// TODO cleanup into port directory
+static void sleep_ms(unsigned int ms)
+{
+#ifdef _MSC_VER
+	Sleep(ms);
+#else
+	usleep(ms * 1000);
+#endif
+}
 
 static bool version_check()
 {
@@ -82,7 +94,7 @@ static void send_led(uint8_t mask, uint8_t val)
 	if (status != 0)
 	{
 		printf("err send %d\n", status);
-	}	
+	}
 }
 
 static void test_device()
@@ -92,18 +104,34 @@ static void test_device()
 		printf("Error reading version, or version mismatch.\n");
 	}
 
-	printf ("Send LED on\n");
-	send_led(0x01, 0x01);
-	usleep(1000000);
+	for (int repeat = 0; repeat < 4; repeat++)
+	{
+		printf("Loop %d\n", repeat);
 
+		for (int i = 0; i < 3; i++)
+		{
+			printf("Send LED %d on\n", i);
+			send_led(LED_REQ_MASK_ALL, 1 << i);
+			sleep_ms(400);
+		}
+	}
+	
 	printf ("Send LED off\n");
-	send_led(0x01, 0x00);
+	send_led(LED_REQ_MASK_ALL, 0x00);
 }
 
 int main(int argc, char **argv)
 {
+	int status;
+
 	printf("Initializing libusb...\n");
-	libusb_init(NULL);
+	status = libusb_init(NULL);
+
+	if (status != 0)
+	{
+		printf("Could not initialize libusb.\n");
+		return 1;
+	}
 
 	printf("Detecting atusbprog device...\n");
 	dev = libusb_open_device_with_vid_pid(NULL, ATUSBPROG_USB_VID, ATUSBPROG_USB_PID);
@@ -111,8 +139,18 @@ int main(int argc, char **argv)
 	if (dev != NULL)
 	{
 		printf("Device found!\n");
-		
-		test_device();
+
+		status = libusb_claim_interface(dev, 0);
+		if (status == 0)
+		{
+			test_device();
+			libusb_release_interface(dev, 0);
+		}
+		else
+		{
+			printf("Could not claim interface.\n");
+		}
+
 		libusb_close(dev);
 	}
 	else

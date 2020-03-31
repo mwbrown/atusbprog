@@ -12,6 +12,9 @@
 #elif defined(__C51__)
 /* Every structure on 8051 is implicitly packed. */
 #define PACKED
+#elif defined(_MSC_VER)
+#define PACKED
+#pragma pack(push,1)
 #else
 #error "Unsupported compiler"
 #endif
@@ -47,6 +50,8 @@ typedef struct aup_out_msg_led_req_s {
 #define LED_REQ_MASK_GRN    0x02            /* Bit to update green LED (P1_B4). */
 #define LED_REQ_MASK_BLU    0x04            /* Bit to update blue LED (P1_B5). */
 
+#define LED_REQ_MASK_ALL    (LED_REQ_MASK_RED | LED_REQ_MASK_GRN | LED_REQ_MASK_BLU)
+
 /* Top-level message structs in/out */
 
 typedef struct aup_out_msg_s {
@@ -66,5 +71,9 @@ typedef struct aup_in_msg_s {
 } PACKED aup_in_msg_t;
 
 #define AUP_IN_MSG_HDR_LEN 1
+
+#ifdef _MSC_VER
+#pragma pack(pop)
+#endif
 
 #endif /*_AUP_PROTO_H_INCLUDED_ */
