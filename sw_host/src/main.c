@@ -46,14 +46,14 @@ static bool version_check()
 
 	out_msg.msg_type = AUP_MSG_VERSION_REQ_RSP;
 	status = libusb_bulk_transfer(dev, AUP_EP1OUT, (unsigned char *)&out_msg, AUP_OUT_MSG_HDR_LEN, &txLen, 0);
-	if (status != 0) {
+	if (status != LIBUSB_SUCCESS) {
 		return false;
 	}
 
 	printf("Reading version response...\n");
 
 	status = libusb_bulk_transfer(dev, AUP_EP1IN, (unsigned char *)&in_msg, sizeof(in_msg), &rxLen, 0);
-	if (status != 0) {
+	if (status != LIBUSB_SUCCESS) {
 		return false;
 	}
 
@@ -91,7 +91,7 @@ static void send_led(uint8_t mask, uint8_t val)
 	out_msg.msg_data.led_req.led_val = val;
 
 	status = libusb_bulk_transfer(dev, AUP_EP1OUT, (unsigned char *)&out_msg, sizeof(aup_out_msg_led_req_t) + AUP_OUT_MSG_HDR_LEN, &txLen, 0);
-	if (status != 0)
+	if (status != LIBUSB_SUCCESS)
 	{
 		printf("err send %d\n", status);
 	}
@@ -115,7 +115,7 @@ static void test_device()
 			sleep_ms(400);
 		}
 	}
-	
+
 	printf ("Send LED off\n");
 	send_led(LED_REQ_MASK_ALL, 0x00);
 }
@@ -127,7 +127,7 @@ int main(int argc, char **argv)
 	printf("Initializing libusb...\n");
 	status = libusb_init(NULL);
 
-	if (status != 0)
+	if (status != LIBUSB_SUCCESS)
 	{
 		printf("Could not initialize libusb.\n");
 		return 1;
@@ -141,7 +141,7 @@ int main(int argc, char **argv)
 		printf("Device found!\n");
 
 		status = libusb_claim_interface(dev, 0);
-		if (status == 0)
+		if (status == LIBUSB_SUCCESS)
 		{
 			test_device();
 			libusb_release_interface(dev, 0);
