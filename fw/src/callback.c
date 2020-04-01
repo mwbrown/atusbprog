@@ -31,9 +31,39 @@
 // Functions
 //-----------------------------------------------------------------------------
 
+typedef void (*usbRxHandler_t)(void);
+
+typedef union {
+    uint8_t buf[AUP_MAX_PACKET_SIZE];
+    aup_in_msg_t msg;
+} usb_tx_t;
+
+typedef union {
+    uint8_t buf[AUP_MAX_PACKET_SIZE];
+    aup_out_msg_t msg;
+} usb_rx_t;
+
 static void atusbprog_setup_tx(uint8_t len_msg);
 static void atusbprog_setup_rx(void);
 static void writechar(uint8_t c);
+
+// Command Handlers
+static void usbRx_VersionReq(void);
+static void usbRx_LedReq(void);
+static void usbRx_InitPgmModeReq(void);
+
+/* This must be kept up-to-date with aup_msg_type_t. */
+SI_SEGMENT_VARIABLE(usbRxHandlers[], const usbRxHandler_t, SI_SEG_CODE) = {
+    usbRx_VersionReq,
+    usbRx_LedReq,
+    usbRx_InitPgmModeReq,
+};
+
+SI_SEGMENT_VARIABLE(numUsbRxHandlers, const size_t, SI_SEG_CODE) =
+        sizeof(usbRxHandlers) / sizeof(usbRxHandlers[0]);
+
+SI_SEGMENT_VARIABLE(usb_tx, usb_tx_t, SI_SEG_IDATA);
+SI_SEGMENT_VARIABLE(usb_rx, usb_rx_t, SI_SEG_IDATA);
 
 void USBD_EnterHandler(void) {
 
@@ -46,37 +76,6 @@ void USBD_ExitHandler(void) {
 void USBD_ResetCb(void) {
 
 }
-
-#if 0
-typedef struct frameReptToFw_s {
-    uint16_t incr;
-} frameReptToFw_t;
-
-typedef struct frameReptToHost_s {
-    uint16_t reptNr;
-    uint16_t sofNr;
-    uint16_t rxNr;
-} frameReptToHost_t;
-
-static uint16_t rx_ctr;
-static frameReptToFw_t lastRx;
-static frameReptToHost_t lastReport;
-static uint16_t numRepts;
-static unsigned char blink2;
-#endif
-
-typedef union {
-    uint8_t buf[AUP_MAX_PACKET_SIZE];
-    aup_in_msg_t msg;
-} usb_tx_t;
-
-typedef union {
-    uint8_t buf[AUP_MAX_PACKET_SIZE];
-    aup_out_msg_t msg;
-} usb_rx_t;
-
-SI_SEGMENT_VARIABLE(usb_tx, usb_tx_t, SI_SEG_IDATA);
-SI_SEGMENT_VARIABLE(usb_rx, usb_rx_t, SI_SEG_IDATA);
 
 static void writechar(uint8_t c) {
     unsigned char sfr_save = SFRPAGE;
@@ -158,10 +157,51 @@ USB_Status_TypeDef USBD_SetupCmdCb(
     return retVal;
 }
 
+static void usbRx_VersionReq(void) {
+    usb_tx.msg.msg_type = AUP_MSG_VERSION_REQ_RSP;
+    usb_tx.msg.msg_data.version_rsp.maj = AUP_PROTO_VERSION_MAJ;
+    usb_tx.msg.msg_data.version_rsp.min = AUP_PROTO_VERSION_MIN;
+    usb_tx.msg.msg_data.version_rsp.rev = AUP_PROTO_VERSION_REV;
+    atusbprog_setup_tx(sizeof(aup_in_msg_version_rsp_t));
+}
+
+static void usbRx_LedReq(void) {
+	// todo cleanup
+	// need note on inverted LED (i.e. bsp define, etc)
+
+	writechar('u');
+
+    if (usb_rx.msg.msg_data.led_req.led_mask & LED_REQ_MASK_RED) {
+    	writechar('1');
+        P1_B6 = usb_rx.msg.msg_data.led_req.led_val & LED_REQ_MASK_RED ? 0 : 1;
+    }
+
+    if (usb_rx.msg.msg_data.led_req.led_mask & LED_REQ_MASK_GRN) {
+    	writechar('2');
+        P1_B4 = usb_rx.msg.msg_data.led_req.led_val & LED_REQ_MASK_GRN ? 0 : 1;
+    }
+
+    if (usb_rx.msg.msg_data.led_req.led_mask & LED_REQ_MASK_BLU) {
+    	writechar('3');
+        P1_B5 = usb_rx.msg.msg_data.led_req.led_val & LED_REQ_MASK_BLU ? 0 : 1;
+    }
+}
+
+static void usbRx_InitPgmModeReq(void) {
+	writechar('p');
+
+	if (usb_rx.msg.msg_data.pgm_mode_req.chip_id == PGM_MODE_CHIP_ID_RAW_SPI) {
+
+	} else {
+
+	}
+}
+
 uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
         uint16_t xferred, uint16_t remaining) {
 
-    //uint16_t incr;
+	usbRxHandler_t handler = NULL;
+	uint8_t command_id;
 
     //UNREFERENCED_ARGUMENT(epAddr);
     UNREFERENCED_ARGUMENT(status);
@@ -178,38 +218,18 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
         return 0;
     }
 
-    // Process the read.
-    switch (usb_rx.msg.msg_type) {
-    case AUP_MSG_VERSION_REQ_RSP:
-        usb_tx.msg.msg_type = AUP_MSG_VERSION_REQ_RSP;
-        usb_tx.msg.msg_data.version_rsp.maj = AUP_PROTO_VERSION_MAJ;
-        usb_tx.msg.msg_data.version_rsp.min = AUP_PROTO_VERSION_MIN;
-        usb_tx.msg.msg_data.version_rsp.rev = AUP_PROTO_VERSION_REV;
-        atusbprog_setup_tx(sizeof(aup_in_msg_version_rsp_t));
-        break;
-    case AUP_MSG_LED_REQ:
+    command_id = usb_rx.msg.msg_type;
+    if (command_id < numUsbRxHandlers) {
+    	handler = usbRxHandlers[command_id];
+    }
 
-    	// todo cleanup
-    	// need note on inverted LED (i.e. bsp define, etc)
-
-    	writechar('u');
-
-        if (usb_rx.msg.msg_data.led_req.led_mask & LED_REQ_MASK_RED) {
-        	writechar('1');
-            P1_B6 = usb_rx.msg.msg_data.led_req.led_val & LED_REQ_MASK_RED ? 0 : 1;
-        }
-
-        if (usb_rx.msg.msg_data.led_req.led_mask & LED_REQ_MASK_GRN) {
-        	writechar('2');
-            P1_B4 = usb_rx.msg.msg_data.led_req.led_val & LED_REQ_MASK_GRN ? 0 : 1;
-        }
-
-        if (usb_rx.msg.msg_data.led_req.led_mask & LED_REQ_MASK_BLU) {
-        	writechar('3');
-            P1_B5 = usb_rx.msg.msg_data.led_req.led_val & LED_REQ_MASK_BLU ? 0 : 1;
-        }
-
-        break;
+    // Did we find a handler?
+    if (handler != NULL) {
+    	handler();
+    } else {
+    	writechar('?');
+    	// Send a generic command response back indicating an error.
+    	// TODO
     }
 
     // Setup the next read.
