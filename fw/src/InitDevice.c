@@ -85,6 +85,7 @@ extern void PBCFG_0_enter_DefaultMode_from_RESET(void) {
 	 - UART1 RTS1 unavailable at Port pin
 	 - UART1 CTS1 unavailable at Port pin
 	 ***********************************************************************/
+	SFRPAGE = 0x00;
 	XBR2 = XBR2_WEAKPUD__PULL_UPS_ENABLED | XBR2_XBARE__ENABLED
 			| XBR2_URT1E__DISABLED | XBR2_URT1RTSE__DISABLED
 			| XBR2_URT1CTSE__DISABLED;
@@ -383,15 +384,14 @@ extern void PORTS_1_enter_DefaultMode_from_RESET(void) {
 	 - P1.1 pin is skipped by the crossbar
 	 - P1.2 pin is skipped by the crossbar
 	 - P1.3 pin is skipped by the crossbar
-	 - P1.4 pin is not skipped by the crossbar
-	 - P1.5 pin is not skipped by the crossbar
-	 - P1.6 pin is not skipped by the crossbar
-	 - P1.7 pin is not skipped by the crossbar
+	 - P1.4 pin is skipped by the crossbar
+	 - P1.5 pin is skipped by the crossbar
+	 - P1.6 pin is skipped by the crossbar
+	 - P1.7 pin is skipped by the crossbar
 	 ***********************************************************************/
 	P1SKIP = P1SKIP_B0__NOT_SKIPPED | P1SKIP_B1__SKIPPED | P1SKIP_B2__SKIPPED
-			| P1SKIP_B3__SKIPPED | P1SKIP_B4__NOT_SKIPPED
-			| P1SKIP_B5__NOT_SKIPPED | P1SKIP_B6__NOT_SKIPPED
-			| P1SKIP_B7__NOT_SKIPPED;
+			| P1SKIP_B3__SKIPPED | P1SKIP_B4__SKIPPED | P1SKIP_B5__SKIPPED
+			| P1SKIP_B6__SKIPPED | P1SKIP_B7__SKIPPED;
 	// [P1SKIP - Port 1 Skip]$
 
 	// $[P1MASK - Port 1 Mask]
@@ -404,6 +404,13 @@ extern void PORTS_1_enter_DefaultMode_from_RESET(void) {
 
 extern void PORTS_2_enter_DefaultMode_from_RESET(void) {
 	// $[P2 - Port 2 Pin Latch]
+	/***********************************************************************
+	 - P2.0 is high. Set P2.0 to drive or float high
+	 - P2.1 is high. Set P2.1 to drive or float high
+	 - P2.2 is high. Set P2.2 to drive or float high
+	 - P2.3 is low. Set P2.3 to drive low
+	 ***********************************************************************/
+	P2 = P2_B0__HIGH | P2_B1__HIGH | P2_B2__HIGH | P2_B3__LOW;
 	// [P2 - Port 2 Pin Latch]$
 
 	// $[P2MDOUT - Port 2 Output Mode]
@@ -413,6 +420,15 @@ extern void PORTS_2_enter_DefaultMode_from_RESET(void) {
 	// [P2MDIN - Port 2 Input Mode]$
 
 	// $[P2SKIP - Port 2 Skip]
+	/***********************************************************************
+	 - P2.0 pin is skipped by the crossbar
+	 - P2.1 pin is not skipped by the crossbar
+	 - P2.2 pin is not skipped by the crossbar
+	 - P2.3 pin is skipped by the crossbar
+	 ***********************************************************************/
+	SFRPAGE = 0x20;
+	P2SKIP = P2SKIP_B0__SKIPPED | P2SKIP_B1__NOT_SKIPPED
+			| P2SKIP_B2__NOT_SKIPPED | P2SKIP_B3__SKIPPED;
 	// [P2SKIP - Port 2 Skip]$
 
 	// $[P2MASK - Port 2 Mask]
