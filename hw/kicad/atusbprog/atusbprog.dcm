@@ -1,0 +1,13 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP +5V
+D power-flag symbol +5V
+K Power Flag Symbol
+$ENDCMP
+#
+$CMP VMCU
+D power-flag symbol +VMCU
+K Power Flag Symbol
+$ENDCMP
+#
+#End Doc Library
