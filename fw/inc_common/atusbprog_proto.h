@@ -34,6 +34,7 @@ typedef enum aup_msg_type_e {
     AUP_MSG_VERSION_REQ_RSP = 0,            /* Version Request / Response. MUST BE 0 */
     AUP_MSG_LED_REQ,                        /* Debug LED request. */
     AUP_MSG_INIT_PGM_MODE_REQ_RSP,          /* Initialize Programming Mode Request/Response. */
+    AUP_MSG_DATA_WRITE,                     /* Raw data payload for FW blob or raw SPI mode. */
 
     /* In messages w/out corresponding Out message */
 
@@ -79,6 +80,12 @@ typedef struct aup_out_msg_led_req_s {
     uint8_t led_val;                        /**< Values of updated LEDs. */
 } PACKED aup_out_msg_led_req_t;
 
+typedef struct aup_out_msg_data_write_s {
+    /* TBD not needed as long as USB packetizes correctly? */
+    // uint8_t len;
+    uint8_t payload[1];						/**< Variable length array (C51 does not support var or 0-len arrays) */
+} PACKED aup_out_msg_data_write_t;
+
 #define LED_REQ_MASK_RED    0x01            /**< Bit to update red LED (P1_B6). */
 #define LED_REQ_MASK_GRN    0x02            /**< Bit to update green LED (P1_B4). */
 #define LED_REQ_MASK_BLU    0x04            /**< Bit to update blue LED (P1_B5). */
@@ -103,6 +110,7 @@ typedef struct aup_out_msg_s {
     union {
         aup_out_msg_led_req_t led_req;
         aup_out_msg_init_pgm_mode_req_t pgm_mode_req;
+        aup_out_msg_data_write_t data_write;
     } msg_data;
 } PACKED aup_out_msg_t;
 

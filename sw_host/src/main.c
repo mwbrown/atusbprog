@@ -97,6 +97,32 @@ static void send_led(uint8_t mask, uint8_t val)
 	}
 }
 
+static void send_data_pattern(uint8_t len)
+{
+    aup_out_msg_t *out_msg;
+    int status;
+    int txLen = 0;
+
+    // TODO: add some defines to calculate message size
+    out_msg = malloc(AUP_OUT_MSG_HDR_LEN + len);
+    
+    if (out_msg == NULL)
+    {
+        printf("could not malloc message\n");
+        return;
+    }
+
+    out_msg->msg_type = AUP_MSG_DATA_WRITE;
+    for (int i = 0; i < len; i++)
+    {
+        out_msg->msg_data.data_write.payload[i] = 0x10 + i;
+    }
+
+    status = libusb_bulk_transfer(dev, AUP_EP1OUT, (unsigned char *)out_msg, AUP_OUT_MSG_HDR_LEN + len, &txLen, 0);
+
+    free(out_msg);
+}
+
 static void test_device()
 {
 	if (!version_check())
@@ -112,7 +138,8 @@ static void test_device()
 		{
 			printf("Send LED %d on\n", i);
 			send_led(LED_REQ_MASK_ALL, 1 << i);
-			sleep_ms(400);
+            send_data_pattern(16);
+            sleep_ms(400);
 		}
 	}
 
