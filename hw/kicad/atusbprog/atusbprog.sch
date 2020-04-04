@@ -1,6 +1,5 @@
 EESchema Schematic File Version 4
-LIBS:atusbprog-cache
-EELAYER 26 0
+EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -469,7 +468,7 @@ U 1 1 5E8965C5
 P 9800 2150
 F 0 "RN1" H 10180 2196 50  0000 L CNN
 F 1 "1.2k" H 10180 2105 50  0000 L CNN
-F 2 "Resistor_THT:R_Array_SIP9" V 10275 2150 50  0001 C CNN
+F 2 "Resistors_THT:R_Array_SIP9" V 10275 2150 50  0001 C CNN
 F 3 "https://www.bourns.com/docs/Product-Datasheets/4600x.pdf" H 9800 2150 50  0001 C CNN
 	1    9800 2150
 	1    0    0    -1  
