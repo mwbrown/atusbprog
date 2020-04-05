@@ -906,9 +906,107 @@ Wire Wire Line
 Text Notes 3600 4550 0    75   ~ 0
 Ext. Power Header
 Wire Notes Line
-	4800 4350 4800 7000
-Wire Notes Line
 	4800 5600 3350 5600
 Wire Notes Line
 	4800 4350 3350 4350
+$Comp
+L Device:LED D10
+U 1 1 5E8A95B0
+P 4350 4000
+F 0 "D10" H 4450 4100 50  0000 C CNN
+F 1 "LTL2R3KYD-EM" V 4297 3883 50  0001 R CNN
+F 2 "LEDs:LED_D5.0mm" H 4350 4000 50  0001 C CNN
+F 3 "https://media.digikey.com/pdf/Data%20Sheets/Lite-On%20PDFs/LTL2R3KGD-EM%20Preliminary.pdf" H 4350 4000 50  0001 C CNN
+	1    4350 4000
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_US R4
+U 1 1 5E8AEB1D
+P 4050 4000
+F 0 "R4" V 3950 4200 50  0000 C CNN
+F 1 "1.2k" V 3936 4000 50  0000 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 4090 3990 50  0001 C CNN
+F 3 "~" H 4050 4000 50  0001 C CNN
+	1    4050 4000
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GND #PWR03
+U 1 1 5E8E2789
+P 4650 4100
+F 0 "#PWR03" H 4650 3850 50  0001 C CNN
+F 1 "GND" H 4650 3927 50  0000 C CNN
+F 2 "" H 4650 4100 50  0001 C CNN
+F 3 "" H 4650 4100 50  0001 C CNN
+	1    4650 4100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4500 4000 4650 4000
+Wire Wire Line
+	4650 4000 4650 4100
+Wire Wire Line
+	4500 3800 4650 3800
+Wire Wire Line
+	4650 3800 4650 4000
+Connection ~ 4650 4000
+$Comp
+L Device:LED D9
+U 1 1 5E90859E
+P 4350 3800
+F 0 "D9" H 4450 3900 50  0000 C CNN
+F 1 "LTL2R3KRD-EM" V 4297 3683 50  0001 R CNN
+F 2 "LEDs:LED_D5.0mm" H 4350 3800 50  0001 C CNN
+F 3 "https://media.digikey.com/pdf/Data%20Sheets/Lite-On%20PDFs/LTL2R3KGD-EM%20Preliminary.pdf" H 4350 3800 50  0001 C CNN
+	1    4350 3800
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_US R3
+U 1 1 5E908B0B
+P 4050 3800
+F 0 "R3" V 3950 4000 50  0000 C CNN
+F 1 "1.2k" V 3936 3800 50  0000 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 4090 3790 50  0001 C CNN
+F 3 "~" H 4050 3800 50  0001 C CNN
+	1    4050 3800
+	0    -1   -1   0   
+$EndComp
+$Comp
+L atusbprog:+5V #PWR02
+U 1 1 5E909998
+P 3750 3700
+F 0 "#PWR02" H 3750 3550 50  0001 C CNN
+F 1 "+5V" H 3750 3874 50  0000 C CNN
+F 2 "" H 3750 3700 50  0001 C CNN
+F 3 "" H 3750 3700 50  0001 C CNN
+	1    3750 3700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3750 3700 3750 3800
+Wire Wire Line
+	3750 3800 3900 3800
+$Comp
+L atusbprog:VMCU #PWR01
+U 1 1 5E910D5D
+P 3550 3700
+F 0 "#PWR01" H 3550 3550 50  0001 C CNN
+F 1 "VMCU" H 3550 3874 50  0000 C CNN
+F 2 "" H 3550 3700 50  0001 C CNN
+F 3 "" H 3550 3700 50  0001 C CNN
+	1    3550 3700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3550 3700 3550 4000
+Wire Wire Line
+	3550 4000 3900 4000
+Text Notes 4000 3600 0    75   ~ 0
+Power LEDs
+Wire Notes Line
+	4800 3400 3350 3400
+Wire Notes Line
+	4800 3400 4800 7000
 $EndSCHEMATC
