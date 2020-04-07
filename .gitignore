@@ -3,3 +3,10 @@ fw/Keil*
 *.sublime-*
 
 sw_host/build
+
+# Kicad temporary files
+hw/**/*.bak
+hw/**/*.kicad_pcb-bak
+hw/**/*.sch-bak
+hw/**/*.bck
+hw/**/fp-info-cache
