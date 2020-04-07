@@ -59,6 +59,7 @@ typedef struct aup_in_msg_cmd_ack_s {
 typedef enum cmd_ack_status_e {
     AUP_CMD_STATUS_SUCCESS = 0,             /**< Success. */
     AUP_CMD_STATUS_ERROR,                   /**< Generic error. */
+    AUP_CMD_STATUS_BUSY,                    /**< There is already a request outstanding. The last command was ignored. */
     AUP_CMD_STATUS_NOT_SUPPORTED,           /**< Command not supported. */
     AUP_CMD_STATUS_BAD_SIGNATURE,           /**< Invalid chip signature. */
 } cmd_ack_status_t;
