@@ -2,6 +2,7 @@
 #include "debug_uart.h"
 
 #include <SI_EFM8UB1_Register_Enums.h>
+
 #include <stdint.h>
 #include <string.h>
 
@@ -19,7 +20,7 @@ SI_SEGMENT_VARIABLE(debug_uart_ctx, debug_uart_context_t, UART_CONTEXT_SEG);
 SI_SEGMENT_VARIABLE(debug_uart_buf[UART_BUFFER_LEN], uint8_t, UART_BUFFER_SEG);
 
 /* Main UART0 Interrupt Handler */
-SI_INTERRUPT (UART0_ISR, UART0_IRQn)
+void debug_uart_handle_uart0_isr(void)
 {
     if (SCON0 & SCON0_TI__BMASK)
     {

@@ -198,6 +198,21 @@ static void read_page(uint8_t page, uint8_t *buf)
     }
 }
 
+static bool init_chip(void)
+{
+    uint8_t cmd_buf[4];
+
+    cmd_buf[0] = 0xAC;
+    cmd_buf[1] = 0x53;
+    cmd_buf[2] = 0x00;
+    cmd_buf[3] = 0x00;
+
+    /* Use cmd_buf as a response buffer as well. */
+    send_data_raw(cmd_buf, sizeof(cmd_buf), cmd_buf);
+
+    return (cmd_buf[3] == 0x69);
+}
+
 static void erase_chip(void)
 {
     uint8_t cmd_buf[4];
@@ -272,18 +287,29 @@ static void test_device()
     send_led(LED_REQ_MASK_ALL, LED_REQ_MASK_GRN);
 
     // Send the data init message.
-    send_data_raw(at89s52_init_msg, 4, NULL);
-
-    erase_chip();
-
-    for (uint16_t addr = 0; addr < sizeof(pgm_mem); addr++)
+    if(init_chip())
     {
-        program_byte(addr, pgm_mem[addr]);
+        erase_chip();
+#if 0
+        for (uint16_t addr = 0; addr < sizeof(pgm_mem); addr++)
+        {
+            program_byte(addr, pgm_mem[addr]);
+        }
+#endif
+
+        for (uint16_t page = 0; page < 32; page++)
+        {
+            read_page(page, NULL);
+        }
+    }
+    else
+    {
+        printf("Chip did not respond to init message.\n");
     }
 
     // Clear the reset line...
-    send_rst_cmd(false, false);
     sleep_ms(100);
+    send_rst_cmd(false, false);
 
     printf ("Send LED off\n");
     send_led(LED_REQ_MASK_ALL, 0x00);

@@ -8,47 +8,34 @@
 
 // USER INCLUDES
 #include <SI_EFM8UB1_Register_Enums.h>
-
-static unsigned char blink;
+#include "sys_timer.h"
+#include "debug_uart.h"
 
 //-----------------------------------------------------------------------------
-// TIMER0_ISR
+// TIMER4_ISR
 //-----------------------------------------------------------------------------
 //
-// TIMER0 ISR Content goes here. Remember to clear flag bits:
-// TCON::TF0 (Timer 0 Overflow Flag)
+// TIMER4 ISR Content goes here. Remember to clear flag bits:
+// TMR4CN0::TF4H (Timer # High Byte Overflow Flag)
+// TMR4CN0::TF4L (Timer # Low Byte Overflow Flag)
 //
 //-----------------------------------------------------------------------------
-SI_INTERRUPT (TIMER0_ISR, TIMER0_IRQn)
+SI_INTERRUPT (TIMER4_ISR, TIMER4_IRQn)
 {
-	//P1_B6 = blink;
-	blink = !blink;
-
-	TCON_TF0 = 0;
+	sys_timer_handle_tmr4_isr();
 }
 
 //-----------------------------------------------------------------------------
-// UART1_ISR
+// UART0_ISR
 //-----------------------------------------------------------------------------
 //
-// UART1 ISR Content goes here. Remember to clear flag bits:
-// SCON1::RI (Receive Interrupt Flag)
-// SCON1::TI (Transmit Interrupt Flag)
-// UART1FCN1::RFRQ (Receive FIFO Request)
-// UART1FCN1::TFRQ (Transmit FIFO Request)
+// UART0 ISR Content goes here. Remember to clear flag bits:
+// SCON0::RI (Receive Interrupt Flag)
+// SCON0::TI (Transmit Interrupt Flag)
 //
 //-----------------------------------------------------------------------------
-SI_INTERRUPT (UART1_ISR, UART1_IRQn)
+SI_INTERRUPT (UART0_ISR, UART0_IRQn)
 {
-	unsigned char c;
-	unsigned char sfr_save = SFRPAGE;
-	SFRPAGE = 0x20;
-
-	// Clear the interrupt flag and echo the output.
-	SCON1_RI = 0;
-	c = SBUF1;
-	SBUF1 = c;
-
-	SFRPAGE = sfr_save;
+	debug_uart_handle_uart0_isr();
 }
 

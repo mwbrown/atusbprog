@@ -16,6 +16,7 @@
 // [Generated Includes]$
 
 #include "debug_uart.h"
+#include "sys_timer.h"
 #include "pwr.h"
 
 //-----------------------------------------------------------------------------
@@ -34,16 +35,14 @@ void SiLabs_Startup(void) {
 }
 
 // TODO: move this somewhere
-static void delay(uint16_t ticks)
-{
+static void delay(uint16_t ticks) {
 	volatile uint16_t tickctr = ticks;
-	while(tickctr--) {
+	while (tickctr--) {
 		;
 	}
 }
 
-static void release_reset(void)
-{
+static void release_reset(void) {
 	// Pulse the reset line on the Atmel C51.
 	PIN_AT_RST = 1;
 	PIN_AT_OE_N = 0;
