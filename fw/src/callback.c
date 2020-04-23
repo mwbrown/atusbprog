@@ -18,12 +18,15 @@
 #include "descriptors.h"
 
 #include "atusbprog_proto.h"
+#include "debug_uart.h"
 
 #include "spi_0.h"
 
 //-----------------------------------------------------------------------------
 // Constants
 //-----------------------------------------------------------------------------
+
+#define USB_BUF_SEG SI_SEG_IDATA
 
 //-----------------------------------------------------------------------------
 // Variables
@@ -47,13 +50,13 @@ typedef union {
 
 static void atusbprog_setup_tx(uint8_t len_msg);
 static void atusbprog_setup_rx(void);
-static void writechar(uint8_t c);
 
 // Command Handlers
 static void usbRx_VersionReq(uint16_t len);
 static void usbRx_LedReq(uint16_t len);
 static void usbRx_InitPgmModeReq(uint16_t len);
 static void usbRx_DataWrite(uint16_t len);
+static void usbRx_RstReq(uint16_t len);
 
 /* This must be kept up-to-date with aup_msg_type_t. */
 SI_SEGMENT_VARIABLE(usbRxHandlers[], const usbRxHandler_t, SI_SEG_CODE) = {
@@ -61,13 +64,14 @@ SI_SEGMENT_VARIABLE(usbRxHandlers[], const usbRxHandler_t, SI_SEG_CODE) = {
     usbRx_LedReq,
     usbRx_InitPgmModeReq,
     usbRx_DataWrite,
+    usbRx_RstReq,
 };
 
 SI_SEGMENT_VARIABLE(numUsbRxHandlers, const size_t, SI_SEG_CODE) =
         sizeof(usbRxHandlers) / sizeof(usbRxHandlers[0]);
 
-SI_SEGMENT_VARIABLE(usb_tx, usb_tx_t, SI_SEG_IDATA);
-SI_SEGMENT_VARIABLE(usb_rx, usb_rx_t, SI_SEG_IDATA);
+SI_SEGMENT_VARIABLE(usb_tx, usb_tx_t, USB_BUF_SEG);
+SI_SEGMENT_VARIABLE(usb_rx, usb_rx_t, USB_BUF_SEG);
 
 void USBD_EnterHandler(void) {
 
@@ -81,17 +85,6 @@ void USBD_ResetCb(void) {
 
 }
 
-static void writechar(uint8_t c) {
-    unsigned char sfr_save = SFRPAGE;
-    SFRPAGE = 0x20;
-    SBUF0 = c;
-    while(!SCON0_TI) {
-        NOP();
-    }
-    SCON0_TI = 0;
-    SFRPAGE = sfr_save;
-}
-
 // TODO: move this
 static void atusbprog_setup_rx(void) {
 
@@ -101,11 +94,11 @@ static void atusbprog_setup_rx(void) {
         return;
     }
 
-    writechar('r');
+    debug_uart_write_char('r');
     status = USBD_Read(EP1OUT, (uint8_t *)usb_rx.buf, AUP_MAX_PACKET_SIZE, true);
 
     if (status != 0) {
-        writechar('!');
+    	debug_uart_write_char('!');
     }
 }
 
@@ -117,17 +110,17 @@ static void atusbprog_setup_tx(uint8_t len_msg) {
         return;
     }
 
-    writechar('t');
+    debug_uart_write_char('t');
     status = USBD_Write(EP1IN, (uint8_t *)usb_tx.buf, len_msg + AUP_IN_MSG_HDR_LEN, false);
 
     if (status != 0) {
-        writechar('!');
+    	debug_uart_write_char('!');
     }
 }
 
 void USBD_SofCb(uint16_t sofNr) {
     UNREFERENCED_ARGUMENT(sofNr);
-    atusbprog_setup_rx();
+    //atusbprog_setup_rx();
 }
 
 USB_Status_TypeDef USBD_SetupCmdCb(
@@ -158,21 +151,18 @@ static void usbRx_LedReq(uint16_t len) {
     // todo cleanup
     // need note on inverted LED (i.e. bsp define, etc)
 
-    writechar('u');
+    debug_uart_write_char('u');
 
     if (usb_rx.msg.msg_data.led_req.led_mask & LED_REQ_MASK_RED) {
-        writechar('1');
-        P1_B6 = usb_rx.msg.msg_data.led_req.led_val & LED_REQ_MASK_RED ? 0 : 1;
+        PIN_LED_RED = usb_rx.msg.msg_data.led_req.led_val & LED_REQ_MASK_RED ? 0 : 1;
     }
 
     if (usb_rx.msg.msg_data.led_req.led_mask & LED_REQ_MASK_GRN) {
-        writechar('2');
-        P1_B4 = usb_rx.msg.msg_data.led_req.led_val & LED_REQ_MASK_GRN ? 0 : 1;
+        PIN_LED_GRN = usb_rx.msg.msg_data.led_req.led_val & LED_REQ_MASK_GRN ? 0 : 1;
     }
 
     if (usb_rx.msg.msg_data.led_req.led_mask & LED_REQ_MASK_BLU) {
-        writechar('3');
-        P1_B5 = usb_rx.msg.msg_data.led_req.led_val & LED_REQ_MASK_BLU ? 0 : 1;
+        PIN_LED_BLU = usb_rx.msg.msg_data.led_req.led_val & LED_REQ_MASK_BLU ? 0 : 1;
     }
 }
 
@@ -180,7 +170,7 @@ static void usbRx_InitPgmModeReq(uint16_t len) {
 
     UNREFERENCED_ARGUMENT(len);
 
-    writechar('p');
+    debug_uart_write_char('p');
 
     if (usb_rx.msg.msg_data.pgm_mode_req.chip_id == PGM_MODE_CHIP_ID_RAW_SPI) {
 
@@ -194,7 +184,10 @@ static void usbRx_DataWrite(uint16_t len) {
     // TODO: just do a spi write
     // TODO: this should be moved out of the USB interrupt
 
-    SI_SEGMENT_VARIABLE(dptr, uint8_t *, SI_SEG_IDATA);
+	uint8_t oldLen;
+
+    SI_SEGMENT_VARIABLE(dptr_tx, uint8_t *, USB_BUF_SEG);
+    SI_SEGMENT_VARIABLE(dptr_rx, uint8_t *, USB_BUF_SEG);
 
     if (len <= AUP_IN_MSG_HDR_LEN) {
         /* No data to send. */
@@ -202,28 +195,47 @@ static void usbRx_DataWrite(uint16_t len) {
     }
 
     len -= AUP_IN_MSG_HDR_LEN;
+    oldLen = len; // Save for the tx later
 
-    dptr = usb_rx.msg.msg_data.data_write.payload;
+    dptr_tx = usb_rx.msg.msg_data.data_write.payload;
 
-    // dummy: lower and  raise AT_OE_N (P1_2)
-
-    P1_B2 = 0;
-    // TODO: kick off spi transfer after delay (spare timer?)
+    // Set up the response.
+    usb_tx.msg.msg_type = AUP_MSG_DATA_WRITE;
+    dptr_rx = usb_tx.msg.msg_data.data_write.payload;
 
     // Fill the fifo
     while (len) {
-        SPI0_pollWriteByte(*dptr);
-        dptr++;
+    	// TODO: switch to using better xfr api
+        SPI0_pollWriteByte(*dptr_tx);
+        *dptr_rx = SPI0_pollReadByte();
+        dptr_tx++;
+        dptr_rx++;
         len--;
     }
 
+#if 0
     // Wait for the byte to finish sending
     while (SPI0_isBusy())
     {
     }
+#endif
 
-    P1_B2 = 1;
+    // Transmit the response.
+    atusbprog_setup_tx(oldLen);
 
+}
+
+static void usbRx_RstReq(uint16_t len)
+{
+	UNREFERENCED_ARGUMENT(len);
+
+	debug_uart_write_char('*');
+
+	/* Update the RST pin before OE. */
+	PIN_AT_RST = (usb_rx.msg.msg_data.rst_req.flags & RST_REQ_FLAG_RST) ? 1 : 0;
+
+	/* OE_N is inverted (flag high = low output). */
+	PIN_AT_OE_N = (usb_rx.msg.msg_data.rst_req.flags & RST_REQ_FLAG_OE) ? 0 : 1;
 }
 
 uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
@@ -243,7 +255,7 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
     }
 
     if  (status != USB_STATUS_OK) {
-        writechar('S');
+    	debug_uart_write_char('S');
         return 0;
     }
 
@@ -256,7 +268,7 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
     if (handler != NULL) {
         handler(xferred);
     } else {
-        writechar('?');
+    	debug_uart_write_char('?');
         // Send a generic command response back indicating an error.
         // TODO
     }
@@ -265,4 +277,14 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
     atusbprog_setup_rx();
 
     return 0;
+}
+
+void USBD_DeviceStateChangeCb(USBD_State_TypeDef oldState, USBD_State_TypeDef newState)
+{
+	UNREFERENCED_ARGUMENT(oldState);
+
+    if (newState == USBD_STATE_CONFIGURED)
+    {
+        atusbprog_setup_rx();
+    }
 }

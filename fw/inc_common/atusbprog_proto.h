@@ -35,6 +35,7 @@ typedef enum aup_msg_type_e {
     AUP_MSG_LED_REQ,                        /* Debug LED request. */
     AUP_MSG_INIT_PGM_MODE_REQ_RSP,          /* Initialize Programming Mode Request/Response. */
     AUP_MSG_DATA_WRITE,                     /* Raw data payload for FW blob or raw SPI mode. */
+    AUP_MSG_RST_REQ,                        /* Debug RST/OEN request. */
 
     /* In messages w/out corresponding Out message */
 
@@ -74,6 +75,10 @@ typedef struct aup_in_msg_data_ack_rsp_s {
     uint16_t data_remain;                   /**< The number of total bytes remaining in the bulk transfer. */
 } PACKED aup_in_msg_data_ack_rsp_t;
 
+typedef struct aup_in_msg_data_write_s {
+    uint8_t payload[1];                     /**< Variable length array (C51 does not support var or 0-len arrays) */
+} PACKED aup_in_msg_data_write_t;
+
 /* Individual OUT messages */
 
 typedef struct aup_out_msg_led_req_s {
@@ -82,8 +87,6 @@ typedef struct aup_out_msg_led_req_s {
 } PACKED aup_out_msg_led_req_t;
 
 typedef struct aup_out_msg_data_write_s {
-    /* TBD not needed as long as USB packetizes correctly? */
-    // uint8_t len;
     uint8_t payload[1];						/**< Variable length array (C51 does not support var or 0-len arrays) */
 } PACKED aup_out_msg_data_write_t;
 
@@ -104,6 +107,13 @@ typedef enum pgm_mode_chip_id_e {
     PGM_MODE_CHIP_ID_AT89S8253,              /**< Atmel AT89S8253. */
 } pgm_mode_chip_id_t;
 
+typedef struct aup_out_msg_rst_req_s {
+    uint8_t flags;
+} aup_out_msg_rst_req_t;
+
+#define RST_REQ_FLAG_OE     0x01            /**< If true, sets OE_N to active (low). */
+#define RST_REQ_FLAG_RST    0x02            /**< If true, sets RST to active (active). */
+
 /* Top-level message structs in/out */
 
 typedef struct aup_out_msg_s {
@@ -112,6 +122,7 @@ typedef struct aup_out_msg_s {
         aup_out_msg_led_req_t led_req;
         aup_out_msg_init_pgm_mode_req_t pgm_mode_req;
         aup_out_msg_data_write_t data_write;
+        aup_out_msg_rst_req_t rst_req;
     } msg_data;
 } PACKED aup_out_msg_t;
 
@@ -124,6 +135,7 @@ typedef struct aup_in_msg_s {
         aup_in_msg_cmd_ack_t cmd_ack;
         aup_in_msg_pgm_mode_rsp_t pgm_mode_rsp;
         aup_in_msg_data_ack_rsp_t data_ack_rsp;
+        aup_in_msg_data_write_t data_write;
     } msg_data;
 } PACKED aup_in_msg_t;
 

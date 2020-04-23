@@ -15,6 +15,7 @@
 #include "efm8_usb.h"
 // [Generated Includes]$
 
+#include "debug_uart.h"
 #include "pwr.h"
 
 //-----------------------------------------------------------------------------
@@ -32,25 +33,29 @@ void SiLabs_Startup(void) {
 	// [SiLabs Startup]$
 }
 
-static void write_char(uint8_t c) {
-	// assumes sfr page is set already
-	SBUF0 = c;
-	while (!SCON0_TI) {
-		NOP();
+// TODO: move this somewhere
+static void delay(uint16_t ticks)
+{
+	volatile uint16_t tickctr = ticks;
+	while(tickctr--) {
+		;
 	}
-
-	SCON0_TI = 0;
 }
 
-static void write_banner(void) {
-	unsigned char sfr_save = SFRPAGE;
-	SFRPAGE = 0x20;
-	write_char('B');
-	write_char('\r');
-	write_char('\n');
-	write_char('0');
-	SFRPAGE = sfr_save;
+static void release_reset(void)
+{
+	// Pulse the reset line on the Atmel C51.
+	PIN_AT_RST = 1;
+	PIN_AT_OE_N = 0;
+
+	delay(16000);
+	PIN_AT_RST = 0;
+	delay(16000);
+
+	PIN_AT_OE_N = 1;
 }
+
+SI_SEGMENT_VARIABLE(bootBanner[], const char, SI_SEG_CODE) = "\r\n--- ATUSBPROG ---\r\n";
 
 //-----------------------------------------------------------------------------
 // main() Routine
@@ -58,8 +63,12 @@ static void write_banner(void) {
 int main(void) {
 	// Call hardware initialization routine
 	enter_DefaultMode_from_RESET();
+	debug_uart_init();
 
-	write_banner();
+	release_reset();
+
+	/* Print boot banner */
+	debug_uart_write_buf(bootBanner, sizeof(bootBanner) - 1);
 
 	while (1) {
 // $[Generated Run-time code]

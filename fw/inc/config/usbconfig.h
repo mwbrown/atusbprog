@@ -94,7 +94,7 @@
 #define SLAB_USB_RESET_CB                      1
 #define SLAB_USB_SETUP_CMD_CB                  1
 #define SLAB_USB_SOF_CB                        1
-#define SLAB_USB_STATE_CHANGE_CB               0
+#define SLAB_USB_STATE_CHANGE_CB               1
 // [Callback Functions]$
 
 // -----------------------------------------------------------------------------
@@ -115,9 +115,9 @@
 // [USB Language]$
 
 // -----------------------------------------------------------------------------
-// 
+//
 // Set the power saving mode
-// 
+//
 // SLAB_USB_PWRSAVE_MODE configures when the device will automatically enter
 // the USB power-save mode. It is a bitmask constant with bit values:
 // USB_PWRSAVE_MODE_OFF       - No energy saving mode selected
@@ -135,7 +135,7 @@
 //                              This is an advanced feature that may be
 //                              useful in certain applications that support
 //                              remote wakeup.
-// 
+//
 // -----------------------------------------------------------------------------
 // $[Power Save Mode]
 #define SLAB_USB_PWRSAVE_MODE                  USB_PWRSAVE_MODE_OFF
@@ -143,7 +143,7 @@
 
 // -----------------------------------------------------------------------------
 // Enable or disable polled mode
-//     
+//
 // When enabled, the application must call USBD_Run() periodically to process
 // USB events.
 // When disabled, USB events will be handled automatically by an interrupt

@@ -48,6 +48,7 @@
 								</option>
 								<option id="com.silabs.ide.si8051.keil.compiler.category.misc.extraflags.609131953" name="Additional Flags" superClass="com.silabs.ide.si8051.keil.compiler.category.misc.extraflags" value="OA" valueType="string"/>
 								<option id="com.silabs.ide.si8051.keil.compiler.category.general.code.1099893338" name="Code size" superClass="com.silabs.ide.si8051.keil.compiler.category.general.code" value="com.silabs.ide.si8051.keil.compiler.category.general.code.large" valueType="enumerated"/>
+								<option id="com.silabs.ide.si8051.keil.compiler.category.listing.assembly.688008545" superClass="com.silabs.ide.si8051.keil.compiler.category.listing.assembly" value="true" valueType="boolean"/>
 								<inputType id="com.silabs.ide.si8051.keil.compiler.inputType.1184118591" superClass="com.silabs.ide.si8051.keil.compiler.inputType"/>
 							</tool>
 							<tool command="AX51" id="com.silabs.ide.si8051.keil.toolchain.assembler.121875879" name="Keil 8051 Assembler" superClass="com.silabs.ide.si8051.keil.toolchain.assembler">
@@ -69,6 +70,7 @@
 							</tool>
 							<tool command="LX51" id="com.silabs.ide.si8051.keil.toolchain.linker.133625846" name="Keil 8051 Linker" superClass="com.silabs.ide.si8051.keil.toolchain.linker">
 								<option id="com.silabs.ide.si8051.keil.linker.category.general.use_control_file.1738236899" name="Use linker control file" superClass="com.silabs.ide.si8051.keil.linker.category.general.use_control_file" value="false" valueType="boolean"/>
+								<option id="com.silabs.ide.si8051.keil.linker.category.ordering.selection.664646016" superClass="com.silabs.ide.si8051.keil.linker.category.ordering.selection" value="./src/InitDevice.OBJ;./src/Interrupts.OBJ;./src/SILABS_STARTUP.OBJ;./src/atusbprog_main.OBJ;./src/callback.OBJ;./src/debug_uart.OBJ;./src/descriptors.OBJ;./lib/efm8ub1/peripheralDrivers/src/pwr.OBJ;./lib/efm8ub1/peripheralDrivers/src/spi_0.OBJ;./lib/efm8ub1/peripheralDrivers/src/usb_0.OBJ;./lib/efm8_usb/src/efm8_usbd.OBJ;./lib/efm8_usb/src/efm8_usbdch9.OBJ;./lib/efm8_usb/src/efm8_usbdep.OBJ;./lib/efm8_usb/src/efm8_usbdint.OBJ;./lib/efm8_assert/assert.OBJ" valueType="string"/>
 								<inputType id="com.silabs.ide.si8051.keil.linker.inputType.1775516721" superClass="com.silabs.ide.si8051.keil.linker.inputType"/>
 							</tool>
 							<tool id="com.silabs.ide.si8051.keil.toolchain.librarian.1822439258" name="Keil 8051 Library Manager" superClass="com.silabs.ide.si8051.keil.toolchain.librarian"/>
