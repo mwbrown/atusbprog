@@ -14,6 +14,7 @@
 
 #include "atusbprog_proto.h"
 #include "device.h"
+#include "cmdline.h"
 
 /* Build with a warning as long as we are still using a reserved PID. */
 #if ATUSBPROG_USB_PID <= 0x0010
@@ -319,6 +320,20 @@ static void test_device()
 int main(int argc, char **argv)
 {
 	int status;
+
+    cmdline_options_t options;
+    if (cmdline_parse(argc, argv, &options) != 0)
+    {
+        printf("Error in command line.\n");
+        return 0;
+    }
+
+    printf("Operation: %d\n", options.op);
+    printf("Device:    %d\n", options.device);
+    printf("Prog File: %s\n", options.prog_filename);
+    printf("Dump File: %s\n", options.dump_filename);
+
+    // TODO: validate and actually bother to use the command line options.
 
 	printf("Initializing libusb...\n");
 	status = libusb_init(NULL);

@@ -20,6 +20,7 @@ endif()
 
 set(ATUSBPROG_SRC
   src/main.c
+  src/cmdline.c
 )
 
 # Add LibUSB information
